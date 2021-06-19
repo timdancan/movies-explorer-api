@@ -1,13 +1,13 @@
-const mongoose = require("mongoose");
-// const bcrypt = require("bcrypt");
-const isEmail = require("validator/lib/isEmail");
-// const isURL = require("validator/lib/isURL");
-// const EmailError = require("../errors/email-error");
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt');
+const isEmail = require('validator/lib/isEmail');
+const EmailError = require('../errors/email-error');
 
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
     minlength: 2,
+    required: true,
     maxlength: 30,
   },
   email: {
@@ -16,34 +16,35 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator: (v) => isEmail(v),
-      message: "Неправильный формат почты",
+      message: 'Неправильный формат почты',
     },
   },
   password: {
     type: String,
     required: true,
+    minlength: 8,
     select: false,
   },
 });
 
 // eslint-disable-next-line func-names
-// userSchema.statics.findUserByCredentials = function (email, password) {
-//   return this.findOne({ email })
-//     .select("+password")
-//     .then((user) => {
-//       if (!user) {
-//         throw new EmailError("Неправильные почта или пароль");
-//       }
-//       return bcrypt.compare(password, user.password).then((matched) => {
-//         if (!matched) {
-//           throw new EmailError("Неправильные почта или пароль");
-//         }
-//         return user;
-//       });
-//     });
-// };
+userSchema.statics.findUserByCredentials = function (email, password) {
+  return this.findOne({ email })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new EmailError('Неправильные почта или пароль');
+      }
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          throw new EmailError('Неправильные почта или пароль');
+        }
+        return user;
+      });
+    });
+};
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model('User', userSchema);
 
 User.createIndexes();
 

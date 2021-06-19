@@ -27,7 +27,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (v) => isURL(v),
-      // message: wrongUrlFormat,
+      message: 'Неправильный формат почты',
     },
   },
   trailer: {
@@ -35,7 +35,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (v) => isURL(v),
-      // message: wrongUrlFormat,
+      message: 'Неправильный формат почты',
     },
   },
   thumbnail: {
@@ -43,7 +43,7 @@ const movieSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (v) => isURL(v),
-      // message: wrongUrlFormat,
+      message: 'Неправильный формат почты',
     },
   },
   owner: {
@@ -51,8 +51,9 @@ const movieSchema = new mongoose.Schema({
     required: true,
   },
   movieId: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: String,
     required: true,
+    unique: true,
   },
   nameRU: {
     type: String,
