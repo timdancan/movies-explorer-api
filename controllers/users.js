@@ -1,9 +1,10 @@
 const bcrypt = require('bcrypt');
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const BadRequestError = require("../errors/bad-request-error");
-const AuthError = require("../errors/auth-error");
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const BadRequestError = require('../errors/bad-request-error');
+const AuthError = require('../errors/auth-error');
 const EmailError = require('../errors/email-error');
+const NotFoundError = require('../errors/not-found-err');
 
 const { JWT_SECRET_KEY = 'secret_key', saltRounds = 10 } = process.env;
 
@@ -12,12 +13,12 @@ exports.getUserInfo = async (req, res, next) => {
     const userId = await User.findById(req.user._id);
     const { email, name } = userId;
     if (!userId) {
-      throw new Error('Пользователь не найден');
+      throw new NotFoundError('Пользователь не найден');
     }
-    res.send(email, name);
+    res.send({ email, name });
   } catch (e) {
-    if (e.name === "CastError") {
-      throw new Error('Переданы некорректные данные');
+    if (e.name === 'CastError') {
+      throw new BadRequestError('Переданы некорректные данные');
     } else {
       next(e);
     }
@@ -30,13 +31,13 @@ exports.updateProfile = (req, res, next) => {
   User.findByIdAndUpdate(userId, { name, email }, { new: true, runValidators: true })
     .then((user) => {
       if (!user) {
-        throw new Error('Пользователь не найден');
+        throw new NotFoundError('Пользователь не найден');
       }
       return res.json(user);
     })
     .catch((err) => {
-      if (err.name === "ValidationError" || err.name === "CastError") {
-        throw new Error('Переданы некорректные данные');
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
+        throw new BadRequestError('Переданы некорректные данные');
       }
       next(err);
     });
@@ -45,7 +46,7 @@ exports.updateProfile = (req, res, next) => {
 exports.authAdmin = (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    throw new BadRequestError('Не передан email или пароль');
+    throw new BadRequestError('Неправильная почта или пароль');
   }
   return User.findUserByCredentials(email, password)
     .then((user) => {

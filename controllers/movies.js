@@ -1,12 +1,12 @@
-const Movie = require("../models/movie");
-const NotFoundError = require("../errors/not-found-err");
-const BadRequestError = require("../errors/bad-request-error");
+const Movie = require('../models/movie');
+const NotFoundError = require('../errors/not-found-err');
+const BadRequestError = require('../errors/bad-request-error');
 
 exports.getMovies = async (req, res, next) => {
   try {
     const movie = await Movie.find({});
     if (!movie) {
-      throw new NotFoundError("фильмы или пользователь не найден");
+      throw new NotFoundError('фильмы или пользователь не найден');
     }
     res.send(movie);
   } catch (e) {
@@ -46,8 +46,8 @@ exports.createMovie = async (req, res, next) => {
     });
     res.json(movie);
   } catch (e) {
-    if (e.name === "ValidationError") {
-      throw new BadRequestError("Переданы некорректные данные");
+    if (e.name === 'ValidationError') {
+      throw new BadRequestError('Переданы некорректные данные');
     } else {
       next(e);
     }
@@ -60,18 +60,18 @@ exports.deleteMovie = (req, res, next) => {
   Movie.findById(req.params.movieId)
     .then((movie) => {
       if (!movie) {
-        throw new NotFoundError("Фильм по указанному _id не найден");
+        throw new NotFoundError('Фильм по указанному _id не найден');
       }
       if (movie.owner.toString() !== owner) {
-        throw new BadRequestError("Можно удалять только свои фильмы");
+        throw new BadRequestError('Можно удалять только свои фильмы');
       }
       Movie.findByIdAndRemove(movieId).then(() => {
         res.send(movie);
       });
     })
     .catch((e) => {
-      if (e.name === "CastError") {
-        throw new BadRequestError("Неправильный формат id");
+      if (e.name === 'CastError') {
+        throw new BadRequestError('Неправильный формат id');
       } else {
         next(e);
       }
